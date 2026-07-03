@@ -5,7 +5,7 @@ from launch_ros.substitutions import FindPackageShare
 
 def generate_launch_description():
     xacro_file = PathJoinSubstitution([
-        FindPackageShare('rover_arm_description'), 'urdf', 'rover_arm.urdf.xacro'
+        FindPackageShare('rover_arm_description'), 'urdf', 'test_arm.xacro'
     ])
     robot_description = Command([FindExecutable(name='xacro'), ' ', xacro_file])
 
