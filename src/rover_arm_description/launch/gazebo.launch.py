@@ -1,5 +1,6 @@
 from launch import LaunchDescription
-from launch.actions import IncludeLaunchDescription
+from launch.actions import IncludeLaunchDescription, RegisterEventHandler
+from launch.event_handlers import OnProcessStart
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import Command, FindExecutable, PathJoinSubstitution
 from launch_ros.actions import Node
@@ -9,40 +10,28 @@ from launch_ros.parameter_descriptions import ParameterValue
 import os
 
 def generate_launch_description():
-    # Locating the xacro file using your preferred substitutions
     package_name = 'rover_arm_description'
-    
-    # 1. Get the path to your package's share directory inside install/
     pkg_share = get_package_share_directory(package_name)
 
-    # 2. Go one directory up so Gazebo can resolve the actual folder name 'rover_arm_description'
-    # This points to: ~/sim_ws/install/rover_arm_description/share/
+    # Inject paths into Gazebo environment variables for mesh resolution
     gazebo_model_path = os.path.dirname(pkg_share)
-    
-    # 3. Inject this path into Gazebo's resource environment variables
-    # We set both variables to support both older Ignition and newer Gazebo configurations
-    if 'GZ_SIM_RESOURCE_PATH' in os.environ:
-        os.environ['GZ_SIM_RESOURCE_PATH'] += os.pathsep + gazebo_model_path
-    else:
-        os.environ['GZ_SIM_RESOURCE_PATH'] = gazebo_model_path
-
-    if 'IGN_GAZEBO_RESOURCE_PATH' in os.environ:
-        os.environ['IGN_GAZEBO_RESOURCE_PATH'] += os.pathsep + gazebo_model_path
-    else:
-        os.environ['IGN_GAZEBO_RESOURCE_PATH'] = gazebo_model_path
+    for env_var in ['GZ_SIM_RESOURCE_PATH', 'IGN_GAZEBO_RESOURCE_PATH']:
+        if env_var in os.environ:
+            os.environ[env_var] += os.pathsep + gazebo_model_path
+        else:
+            os.environ[env_var] = gazebo_model_path
 
     xacro_file = PathJoinSubstitution([
-        FindPackageShare('rover_arm_description'), 'urdf', 'rover_arm.xacro'
+        FindPackageShare(package_name), 'urdf', 'rover_arm_sim.xacro'
     ])
     
-    # Compiling xacro via the ROS 2 Command pipe
     robot_description = {
         'robot_description': ParameterValue(
             Command([FindExecutable(name='xacro'), ' ', xacro_file]), value_type=str
         )
     }
 
-    # 1. Robot State Publisher (Works natively with the Command substitution)
+    # 1. Robot State Publisher
     node_robot_state_publisher = Node(
         package='robot_state_publisher',
         executable='robot_state_publisher',
@@ -57,7 +46,7 @@ def generate_launch_description():
         launch_arguments={'gz_args': '-r empty.sdf'}.items()
     )
 
-    # 3. Gazebo Spawner (We pass the same Command substitution to the arguments list)
+    # 3. Gazebo Spawner
     node_spawn_entity = Node(
         package='ros_gz_sim',
         executable='create',
@@ -69,13 +58,15 @@ def generate_launch_description():
         ]
     )
 
-    # 4. Bridge Node for Clock and Transforms
+    # 4. Bridge Node for Clock, Transforms, and Gripper Camera
     node_gz_bridge = Node(
         package='ros_gz_bridge',
         executable='parameter_bridge',
         arguments=[
             '/clock@rosgraph_msgs/msg/Clock[gz.msgs.Clock',
             '/tf@tf2_msgs/msg/TFMessage[gz.msgs.Pose_V',
+            # ADDED: Translates the camera stream from Gazebo -> ROS 2
+            '/gripper_camera/image@sensor_msgs/msg/Image[gz.msgs.Image'
         ],
         output='screen'
     )
@@ -86,10 +77,49 @@ def generate_launch_description():
         executable='rviz2',
     )
 
-    joint_state_publisher_gui = Node(
-        package='joint_state_publisher_gui',
-        executable='joint_state_publisher_gui',
+    # ==================== TELEOP & CONTROLLER ADDITIONS ====================
+
+    # 6. Physical Joystick Driver Node
+    joy_node = Node(
+        package='joy',
+        executable='joy_node',
+        name='joy_node',
+        parameters=[{
+            'deadzone': 0.05,
+            'autorepeat_rate': 20.0
+        }]
     )
+
+    # 7. Your Custom C++ Teleop Control Node
+    sim_control_node = Node(
+        package=package_name,
+        executable='sim_control_node',
+        name='sim_control_node',
+        output='screen',
+        parameters=[{'use_sim_time': True}]
+    )
+
+    # 8. ros2_control Spawners
+    joint_state_broadcaster = Node(
+        package="controller_manager",
+        executable="spawner",
+        arguments=["joint_state_broadcaster"],
+    )
+
+    arm_controller = Node(
+        package="controller_manager",
+        executable="spawner",
+        arguments=["arm_controller"],
+    )
+
+    # Delay loading the controllers until after your robot has actually spawned in Gazebo
+    delay_controllers = RegisterEventHandler(
+        event_handler=OnProcessStart(
+            target_action=node_spawn_entity,
+            on_start=[joint_state_broadcaster, arm_controller],
+        )
+    )
+    # =======================================================================
 
     return LaunchDescription([
         node_robot_state_publisher,
@@ -97,5 +127,7 @@ def generate_launch_description():
         node_spawn_entity,
         node_gz_bridge,
         node_rviz,
-        joint_state_publisher_gui
+        joy_node,
+        sim_control_node,
+        delay_controllers
     ])

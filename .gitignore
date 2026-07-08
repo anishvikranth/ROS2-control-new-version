@@ -221,3 +221,9 @@ __marimo__/
 build/
 log/
 install/
+
+# blender
+rover_arm.blend1
+rover.blend1
+
+src/rover_arm_hardware/*

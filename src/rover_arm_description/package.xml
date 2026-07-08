@@ -16,6 +16,9 @@
   <depend>xacro</depend>
   <depend>robot_state_publisher</depend>
   <depend>joint_state_publisher_gui</depend>
+  <depend>rclcpp</depend>
+  <depend>sensor_msgs</depend>
+  <depend>trajectory_msgs</depend>
 
   <export>
     <build_type>ament_cmake</build_type>
