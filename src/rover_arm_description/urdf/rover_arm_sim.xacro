@@ -214,7 +214,8 @@
   </link>
   <xacro:blue_pla link_name="camera_mount_link"/>
 
-  <link name="camera_optical_frame"/>
+  <link name="gripper_camera_optical_frame"/>
+  <link name="zed_camera_optical_frame"/>
 
   <joint name="stand_link_joint" type="fixed">
     <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
@@ -278,7 +279,7 @@
   <joint name="camera_optical_joint" type="fixed">
     <origin xyz="0 0.02 0.035" rpy="0 ${pi/15} 1.57079632679"/>
     <parent link="camera_mount_link"/>
-    <child link="camera_optical_frame"/>
+    <child link="gripper_camera_optical_frame"/>
   </joint>
 
   <ros2_control name="GazeboSimSystem" type="system">
@@ -374,7 +375,7 @@
     </plugin>
   </gazebo>
 
-  <gazebo reference="camera_optical_frame">
+  <gazebo reference="gripper_camera_optical_frame">
     <sensor name="camera_mount_link_sensor" type="camera">
       <always_on>true</always_on>
       <update_rate>30</update_rate>
