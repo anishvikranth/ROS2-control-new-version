@@ -215,7 +215,8 @@
   <xacro:blue_pla link_name="camera_mount_link"/>
 
   <link name="gripper_camera_optical_frame"/>
-  <link name="zed_camera_optical_frame"/>
+ 
+ <!--  <link name="zed_camera_optical_frame"/>   Commented for now, uncomment after properly establishing joint-->      
 
   <joint name="stand_link_joint" type="fixed">
     <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
@@ -397,3 +398,4 @@
     </sensor>
   </gazebo>
 </robot>
+

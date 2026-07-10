@@ -253,3 +253,6 @@
     </sensor>
   </gazebo>
 </robot>
+
+<!-- This file should only start with the robot we will add separately the hardware and software plugins later
+So I don't want to spoil this file by adding plugins here-->

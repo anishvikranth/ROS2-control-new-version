@@ -241,8 +241,10 @@
   <ros2_control name="RoverArmHardware" type="system">
     <hardware>
       <plugin>rover_arm_hardware/RoverArmHardware</plugin>
-      <param name="serial_port">/dev/ttyACM0</param>
-      <param name="baud_rate">115200</param>
+      <xacro:property name="serial_port" value="/dev/ttyACM0"/>
+      <xacro:property name="baud_rate" value="115200"/>
+      <param name="serial_port">${serial_port}</param>      <!--- If by any chance the port changes we can edit here-->
+      <param name="baud_rate">${baud_rate}</param>
     </hardware>
     
     <xacro:joint_interface joint_name="base_link_joint" />

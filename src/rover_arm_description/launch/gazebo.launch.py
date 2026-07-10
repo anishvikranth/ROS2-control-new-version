@@ -52,7 +52,8 @@ def generate_launch_description():
         executable='create',
         output='screen',
         arguments=[
-            '-string', Command([FindExecutable(name='xacro'), ' ', xacro_file]),
+          # '-string', Command([FindExecutable(name='xacro'), ' ', xacro_file]),
+            '-topic', 'robot_description',    #Replaced string with topic
             '-name', 'rover_arm',
             '-z', '0.1'
         ]
@@ -72,9 +73,22 @@ def generate_launch_description():
     )
 
     # 5. RViz2
+#node_rviz = Node(
+#     package='rviz2',
+#    executable='rviz2',
+# )
     node_rviz = Node(
         package='rviz2',
         executable='rviz2',
+        output='screen',
+        arguments=[
+            '-d',
+            PathJoinSubstitution([
+                FindPackageShare(package_name),
+                'rviz',
+                'rover.rviz'
+            ])
+        ]
     )
 
     # ==================== TELEOP & CONTROLLER ADDITIONS ====================
