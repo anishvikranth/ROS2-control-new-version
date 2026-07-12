@@ -59,4 +59,6 @@
     <disable_collisions link1="palm_link" link2="right_finger_link" reason="Adjacent"/>
     <disable_collisions link1="palm_link" link2="wrist_link" reason="Adjacent"/>
     <disable_collisions link1="shoulder_link" link2="stand_link" reason="Default"/>
+    <!--- Added the below one line for checking since it was not detected when I generated the collision matrix-->
+    <disable_collisions link1="right_finger_link" link2="wrist_link" reason="Never"/>
 </robot>

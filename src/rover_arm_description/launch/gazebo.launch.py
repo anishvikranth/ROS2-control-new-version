@@ -35,7 +35,8 @@ def generate_launch_description():
     node_robot_state_publisher = Node(
         package='robot_state_publisher',
         executable='robot_state_publisher',
-        parameters=[robot_description]
+        parameters=[robot_description,
+                     {"use_sim_time": True},]    #To use simulation time for the robot state publisher ie../clock topic from Gazebo
     )
 
     # 2. Gazebo World Launch
@@ -81,6 +82,7 @@ def generate_launch_description():
         package='rviz2',
         executable='rviz2',
         output='screen',
+        parameters=[{"use_sim_time": True}],
         arguments=[
             '-d',
             PathJoinSubstitution([
