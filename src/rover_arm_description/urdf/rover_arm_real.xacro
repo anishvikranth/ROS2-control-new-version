@@ -238,15 +238,15 @@
       </joint>
   </xacro:macro>
 
+
   <ros2_control name="RoverArmHardware" type="system">
     <hardware>
       <plugin>rover_arm_hardware/RoverArmHardware</plugin>
-      <xacro:property name="serial_port" value="/dev/ttyACM0"/>
-      <xacro:property name="baud_rate" value="115200"/>
-      <param name="serial_port">${serial_port}</param>      <!--- If by any chance the port changes we can edit here-->
-      <param name="baud_rate">${baud_rate}</param>
+      <param name="kp">40.0</param>
+      <param name="ki">5.0</param>
+      <param name="pwm_limit">255.0</param>
     </hardware>
-    
+
     <xacro:joint_interface joint_name="base_link_joint" />
     <xacro:joint_interface joint_name="shoulder_link_joint" />
     <xacro:joint_interface joint_name="elbow_link_joint" />
@@ -254,6 +254,7 @@
     <xacro:joint_interface joint_name="palm_link_joint" />
     <xacro:joint_interface joint_name="left_finger_link_joint" />
     <xacro:joint_interface joint_name="right_finger_link_joint" />
-
   </ros2_control>
+
 </robot>
+

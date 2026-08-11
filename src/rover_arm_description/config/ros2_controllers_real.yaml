@@ -27,6 +27,22 @@ arm_controller:
     interpolation_method: splines
     allow_partial_joints_goal: true
 
+
+    gains:
+      base_link_joint:            {p: 5.0, i: 0.0, d: 0.1, i_clamp: 1.0}
+      shoulder_link_joint:        {p: 5.0, i: 0.0, d: 0.1, i_clamp: 1.0}
+      elbow_link_joint:           {p: 5.0, i: 0.0, d: 0.1, i_clamp: 1.0}
+      wrist_link_joint:           {p: 5.0, i: 0.0, d: 0.1, i_clamp: 1.0}
+      palm_link_joint:            {p: 5.0, i: 0.0, d: 0.1, i_clamp: 1.0}
+      left_finger_link_joint:     {p: 5.0, i: 0.0, d: 0.1, i_clamp: 1.0}
+      right_finger_link_joint:    {p: 5.0, i: 0.0, d: 0.1, i_clamp: 1.0}
+   
+# Required since command_interfaces is velocity-only: without gains, JTC
+# has no way to convert a position-trajectory error into a velocity
+# command. These are starting-point placeholders, not tuned values --
+# tune them the same way you'll tune RoverArmHardware's own kp/ki, ideally
+# with the arm unloaded first. A joint that oscillates needs lower p; one
+# that lags behind the trajectory needs higher p or some i.
 # constraints:
 #       goal_time: 0.6 # seconds allowed to reach the final goal
 #       stopped_velocity_tolerance: 0.05 # rad/s to consider the arm "stopped"

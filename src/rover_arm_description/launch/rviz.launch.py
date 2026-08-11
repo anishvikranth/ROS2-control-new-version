@@ -13,7 +13,8 @@ def generate_launch_description():
         Node(
             package='robot_state_publisher',
             executable='robot_state_publisher',
-            parameters=[{'robot_description': robot_description}]
+            parameters=[{'robot_description': robot_description},
+                        {'use_sim_time': True}]
         ),
         Node(
             package='joint_state_publisher_gui',
@@ -21,7 +22,7 @@ def generate_launch_description():
         ),
         Node(
             package='rviz2',
-            executable='rviz2',
+            executable='rviz2', 
         ),
     ])
 
